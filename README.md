@@ -1,2 +1,2 @@
-# countdown_ascii
-ASCII countdown
+# ASCII countdow
+A Bash countdown!
