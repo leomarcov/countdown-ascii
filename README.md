@@ -15,3 +15,13 @@ Samples:
   countdown 10:32	Start countdown from current time to 10:32
   countdown 10:32 9:00	Start countdown from 9:00 to 10:32
 ```
+
+## Config
+For config banner edit `countdown` file and set `banner1` and `banner2` variables:
+```
+#!/bin/bash
+
+# BANNER CONIFG
+banner1="EXAM TIME!"
+banner2="KEEP CALM AND FOCUS"
+```
