@@ -187,11 +187,10 @@ while true; do
 		echo -e "\e[91m"
 	fi
 
-	# Ring from 90% in each percent increment
-	if [ "$percent" -ge 90 ] && [ "$percent" -lt 100 ] && [ "$percent" -gt "$percent2" ]; then
+	# Ring from 95% in each 10 seconds
+	if [ "$percent" -ge 95 ] && [ "$percent" -lt 100 ] && [ $(($dnow%10)) -eq 0 ]; then
 		ring &
 	fi
-	percent2="$percent"
 	
 	# Update countdown and timer
 	rc=$(hhmmss_format $((duntil-dnow)) )				# Remaining countdown
