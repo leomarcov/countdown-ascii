@@ -16,7 +16,7 @@ Samples:
   countdown 10:32 9:00	Continue countdown from 9:00 to 10:32
 ```
 
-## Configy
+## Config
 You can config banner text editing `countdown` file and setting `banner1` and `banner2` variables:
 ```
 #!/bin/bash
