@@ -1,0 +1,192 @@
+#!/bin/bash
+
+# BANNER CONIFG
+banner1="EXAM TIME!"
+banner2="KEEP CALM AND FOCUS"
+
+
+
+#=== FUNCTION ==================================================================
+# NAME: print_centered
+# DESCRIPTION: print text in teminal centered
+# PARAMETERS
+#	$1	text to print
+# [$2]	horizontal line to start printing
+#===============================================================================
+function print_centered() {
+	text="$1"
+	start_line="$2"
+	[ "$start_line" ] && tput cup "$start_line" 0
+	width=$(echo "$text" | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g" | head -1 | wc -m)
+	tab=$((($(tput cols)-$width)/2))
+	[ "$tab" -lt 0 ] && tab=0
+
+	echo "$text" | while read; do
+		echo -en "\e[${tab}C"
+		echo "${REPLY} "
+	done
+}
+
+
+#=== FUNCTION ==================================================================
+# NAME: countdown
+# DESCRIPTION: print countdown in format h:m:s from current time
+# PARAMETERS
+#	$1	until time in format hh:mm[:ss]
+#===============================================================================
+function countdown() {
+	local now="$(date +%s)"
+	local until="$(date -d"$(date +%Y-%m-%d) $1" +%s)"
+	local c=$((until-now))
+	[ "$c" -lt 0 ] && c=$((c*-1))
+	local h=$((c/(60*60)))
+	c=$((c-h*60*60))
+	local m=$((c/60))
+	c=$((c-m*60))
+	local s=$c
+	printf "%02d:%02d:%02d" $h $m $s
+}
+
+
+#=== FUNCTION ==================================================================
+# NAME: bar
+# DESCRIPTION: print bar with percentaje 
+# PARAMETERS
+#	$1	percentaje to draw
+#===============================================================================
+function progress_bar() {
+	local percent="$1"
+	local total="$(($(tput cols)-10))"
+	local current=$((total*percent/100))
+	local pending=$((total-current))
+	local color="\e[91m"
+	[ "$percent" -lt 85 ] && color="\e[33m"
+	[ "$percent" -lt 50 ] && color="\e[92m" 
+	echo -en "$color"; 	seq -s "█" 1 $current | tr -d "[0-9\n]"
+	echo -en "\e[0m"; 	[ "$pending" -gt 0 ]  && seq -s "▒" 1 $pending | tr -d "[0-9]" || echo
+	echo -en "$color";  seq -s "█" 1 $current | tr -d "[0-9\n]"
+	echo -en "\e[0m";	[ "$pending" -gt 0 ]  && seq -s "▒" 1 $pending | tr -d "[0-9]" || echo 
+	echo -en "$color";  seq -s "█" 1 $current | tr -d "[0-9\n]"
+	echo -en "\e[0m";	[ "$pending" -gt 0 ]  && seq -s "▒" 1 $pending | tr -d "[0-9]" || echo
+	seq -s " " 1 $(($current-1-2*$percent/100)) | tr -d "[0-9\n]"; echo "${percent}%"
+}
+
+
+#=== FUNCTION ==================================================================
+# NAME: screen_border
+# DESCRIPTION: print border in screen
+#===============================================================================
+function screen_border() {
+	l="$(tput lines)"
+	c="$(tput cols)"
+
+	# Draw border
+	echo
+	echo " ┌$(seq -s "─" 1 $((c-3)) | tr -d "[0-9]")┐ "
+	for ((i=0; i<$l-4;i++)); do
+		echo " │$(seq -s " " 1 $((c-3)) | tr -d "[0-9]")│ "
+	done
+	echo " └$(seq -s "─" 1 $((c-3)) | tr -d "[0-9]")┘ "
+}
+
+
+#=== FUNCTION ==================================================================
+# NAME: cursor_hide
+# DESCRIPTION: hides cursor
+#===============================================================================
+function cursor_hide() {
+	tput civis					# Hide cursor
+	stty -echo &> /dev/null		# Avoid keyboard write
+}
+
+#=== FUNCTION ==================================================================
+# NAME: cursor_show
+# DESCRIPTION: show cursor
+#===============================================================================
+function cursor_show() {
+	tput cvvis					# Show cursor
+	stty echo &> /dev/null		# Allow keyboard write
+	tput cup $l 0
+}
+
+
+#=== FUNCTION ==================================================================
+# NAME: ring
+# DESCRIPTION: ring from pc spekaer
+#===============================================================================
+function ring() {
+	which beep &>/dev/null || return 1
+	modprobe pcspkr &>/dev/null || return 1
+	for n in 1 2 3 ; do for f in 1 2 1 2 1 2 1 2 1 2 ; do beep -f ${f}000 -l 10; done; done
+}
+
+
+#=== FUNCTION ==================================================================
+# NAME: help
+# DESCRIPTION: show help and exit
+# PARAMETERS
+#	[$1]	exit code
+#===============================================================================
+function help() {
+	echo -e "Usage: \e[1m$(basename $0)\e[0m [UNTIL-HOUR] [FROM-HOUR]"
+	echo -e "Samples:"
+	echo -e "  \e[1m$(basename $0)\e[0m\t\tOnly show current time"
+	echo -e "  \e[1m$(basename $0) 10:32\e[0m\tStart countdown from current time to 10:32"
+	echo -e "  \e[1m$(basename $0) 10:32 9:00\e[0m\tStart countdown from 9:00 to 10:32"
+	[ "$1" ] && exit "$1" || exit 0
+}
+
+
+
+# HELP
+[ "$1" = "-h" ] && help
+
+# CHECK PARAMETERS
+until="$1"
+from="$2"
+[ ! "$from" ] && from="$(date +"%H:%M:%S")"
+date -d"$(date +%Y-%m-%d) $until" &>/dev/null || { echo "$until: Incorrect hour format (hh:mm[:ss])" 1>&2; exit 1; }
+date -d"$(date +%Y-%m-%d) $from" &>/dev/null || { echo "$from: Incorrect hour format (hh:mm[:ss])"  1>&2; exit 1; }
+
+
+# CHECK DEPENDENCES
+! which tput &>/dev/null && { 	echo "tput command not found!"  1>&2; 	exit 1; }
+! which toilet &>/dev/null && { echo "toilet command not found!"  1>&2; exit 1; }
+[ "$(tput lines)" -lt 25 ] && { echo "minimun screen lines is 25"  1>&2; exit 1; }
+
+
+# Initialize
+clear
+cursor_hide
+trap 'cursor_show; exit 0' INT TERM HUP
+
+# Print banner
+screen_border
+print_centered "$(toilet -f future "$banner1")" 5
+print_centered "$banner2" 8
+
+
+while true; do
+	c=$(countdown "$until")		# Remaining time
+
+	percent=$(( ($(date +%s)-$(date -d"$(date +%Y-%m-%d) $from" +%s))*100/($(date -d"$(date +%Y-%m-%d) $until" +%s)-$(date -d"$(date +%Y-%m-%d) $from" +%s)) ))
+	
+	# Check overflow and underflow
+	if [ $percent -lt 0 ] || [ $percent -gt 100 ]; then
+		percent=100
+		echo -e "\e[91m"
+	fi
+
+	# Ring from 90% in each percent increment
+	if [ "$percent" -ge 90 ] && [ "$percent" -lt 100 ] && [ "$percent" -gt "$percent2" ]; then
+		ring &
+	fi
+	percent2="$percent"
+	
+	# Update countdown and timer
+	print_centered "$(toilet -f future "$c")" 14
+	print_centered "$(progress_bar $percent)" 18
+
+	sleep 1
+done
+
