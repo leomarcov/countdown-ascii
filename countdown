@@ -1,4 +1,16 @@
 #!/bin/bash
+#===================================================================================
+# ASCII COUNTDOWN TIMER
+#         FILE: countdown
+#        USAGE: countdown [UNTIL-HOUR] [FROM-HOUR]
+#
+#  DESCRIPTION: Show a countdown timer in ASCII
+#
+#       AUTHOR: Leonardo Marco
+#	   LICENSE: GNU General Public License v3.0
+#      CREATED: 19.10.2019
+#===================================================================================
+
 
 # BANNER CONIFG
 banner1="EXAM TIME!"
