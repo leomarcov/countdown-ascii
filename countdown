@@ -6,11 +6,10 @@
 #
 #  DESCRIPTION: Show a countdown timer in ASCII
 #
-#       AUTHOR: Leonardo Marco
+#       AUTHOR: Leonardo Marco (labadmin@leonardomarco.com)
 #	   LICENSE: GNU General Public License v3.0
 #      CREATED: 19.10.2019
 #===================================================================================
-
 
 # BANNER CONIFG
 banner1="EXAM TIME!"
@@ -159,12 +158,13 @@ from="$2"
 [ ! "$from" ] && from="$(date +"%H:%M:%S")"
 date -d"$(date +%Y-%m-%d) $until" &>/dev/null || { echo "$until: Incorrect hour format (hh:mm[:ss])" 1>&2; exit 1; }
 date -d"$(date +%Y-%m-%d) $from" &>/dev/null || { echo "$from: Incorrect hour format (hh:mm[:ss])"  1>&2; exit 1; }
-
+duntil="$(date -d"$(date +%Y-%m-%d) $until" +%s)"
+dfrom="$(date -d"$(date +%Y-%m-%d) $from" +%s)"
 
 # CHECK DEPENDENCES
-! which tput &>/dev/null && { 	echo "tput command not found!"  1>&2; 	exit 1; }
-! which toilet &>/dev/null && { echo "toilet command not found!"  1>&2; exit 1; }
-[ "$(tput lines)" -lt 25 ] && { echo "minimun screen lines is 25"  1>&2; exit 1; }
+! which tput &>/dev/null   && {	echo "tput command not found!" 1>&2; 	exit 1; }
+! which toilet &>/dev/null && { echo "toilet command not found!" 1>&2;	exit 1; }
+[ "$(tput lines)" -lt 25 ] && { echo "minimun screen lines is 25" 1>&2; exit 1; }
 
 
 # Initialize
@@ -181,10 +181,11 @@ print_centered "$banner2" 8
 while true; do
 	c=$(countdown "$until")		# Remaining time
 
-	percent=$(( ($(date +%s)-$(date -d"$(date +%Y-%m-%d) $from" +%s))*100/($(date -d"$(date +%Y-%m-%d) $until" +%s)-$(date -d"$(date +%Y-%m-%d) $from" +%s)) ))
-	
+	dnow="$(date +%s)"
+	percent=$(( (dnow-dfrom)*100/(duntil-dfrom) ))
+
 	# Check overflow and underflow
-	if [ $percent -lt 0 ] || [ $percent -gt 100 ]; then
+	[ "$until" ] && if [ $percent -lt 0 ] || [ $percent -gt 100 ] || [ $((duntil-dfrom)) -lt 0 ]; then
 		percent=100
 		echo -e "\e[91m"
 	fi
@@ -197,7 +198,7 @@ while true; do
 	
 	# Update countdown and timer
 	print_centered "$(toilet -f future "$c")" 14
-	print_centered "$(progress_bar $percent)" 18
+	[ "$until" ] && print_centered "$(progress_bar $percent)" 18
 
 	sleep 1
 done
