@@ -2,7 +2,7 @@
 A Bash countdown timer!
 
 ## Dependences
-  * toilet
+  * [toilet](http://caca.zoy.org/wiki/toilet)
   * tput
 
 ## Demo
