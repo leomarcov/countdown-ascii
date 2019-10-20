@@ -1,10 +1,6 @@
 # ASCII countdow timer
 A Bash countdown timer!
 
-## Dependences
-  * [toilet](http://caca.zoy.org/wiki/toilet)
-  * tput
-
 ## Demo
 <p align="center">
   <img src="https://user-images.githubusercontent.com/32820131/67157034-9673f780-f326-11e9-9e1e-122cc0797fe2.gif">
@@ -29,6 +25,11 @@ For config banner edit `countdown` file and set `banner1` and `banner2` variable
 banner1="EXAM TIME!"
 banner2="KEEP CALM AND FOCUS"
 ```
+
+## Dependences
+  * [toilet](http://caca.zoy.org/wiki/toilet)
+  * tput
+
 
 ## Lincense
 License is [GPLv3](LICENSE)
