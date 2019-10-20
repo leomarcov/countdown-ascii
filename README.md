@@ -24,6 +24,7 @@ For config banner edit `countdown` file and set `banner1` and `banner2` variable
 # BANNER CONIFG
 banner1="EXAM TIME!"
 banner2="KEEP CALM AND FOCUS"
+...
 ```
 
 ## Dependences
