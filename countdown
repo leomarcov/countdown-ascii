@@ -29,7 +29,7 @@ function print_centered() {
 	start_line="$2"
 	[ "$start_line" ] && tput cup "$start_line" 0
 	# Get text width (only from first line and exclude special format characters)
-	width=$(echo "$text" | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g" | head -1 | wc -m)
+	width=$(echo -n "$text" | head -1 | tr -d '\n' | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g" | wc -m)
 	tab=$((($(tput cols)-$width)/2))
 	[ "$tab" -lt 0 ] && tab=0
 
@@ -72,12 +72,12 @@ function progress_bar() {
 	local color="\e[91m"
 	[ "$percent" -lt 85 ] && color="\e[33m"
 	[ "$percent" -lt 50 ] && color="\e[92m" 
-	echo -en "$color"; 	seq -s "█" 1 $current | tr -d "[0-9\n]"
-	echo -en "\e[0m"; 	[ "$pending" -gt 0 ]  && seq -s "▒" 1 $pending | tr -d "[0-9]" || echo
-	echo -en "$color";  seq -s "█" 1 $current | tr -d "[0-9\n]"
-	echo -en "\e[0m";	[ "$pending" -gt 0 ]  && seq -s "▒" 1 $pending | tr -d "[0-9]" || echo 
-	echo -en "$color";  seq -s "█" 1 $current | tr -d "[0-9\n]"
-	echo -en "\e[0m";	[ "$pending" -gt 0 ]  && seq -s "▒" 1 $pending | tr -d "[0-9]" || echo
+	echo -en "$color"; 	seq -s "█" 0 $current | tr -d "[0-9\n]"; 
+	echo -en "\e[0m"; 	seq -s "▒" 0 $pending | tr -d "[0-9\n]"; echo
+	echo -en "$color";  seq -s "█" 0 $current | tr -d "[0-9\n]"; 
+	echo -en "\e[0m";	seq -s "▒" 0 $pending | tr -d "[0-9\n]"; echo
+	echo -en "$color";  seq -s "█" 0 $current | tr -d "[0-9\n]"; 
+	echo -en "\e[0m";	seq -s "▒" 0 $pending | tr -d "[0-9\n]"; echo
 	seq -s " " 1 $(($current-1-2*$percent/100)) | tr -d "[0-9\n]"; echo "${percent}%"
 }
 
@@ -187,8 +187,11 @@ while true; do
 		echo -e "\e[91m"
 	fi
 
-	# Ring from 95% in each 10 seconds
-	if [ "$percent" -ge 95 ] && [ "$percent" -lt 100 ] && [ $(($dnow%10)) -eq 0 ]; then
+	# Ring!
+	if  [ "$percent" -ge 100 ] || \
+	   ([ "$percent" -ge 85 ] && [ $(($dnow%(60*5))) -eq 0 ]) || \
+	   ([ "$percent" -ge 95 ] && [ $(($dnow%30)) -eq 0 ])
+	then 
 		ring &
 	fi
 	
