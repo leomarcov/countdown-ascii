@@ -1,5 +1,5 @@
 # ASCII countdow timer
-A exciting Bash countdown timer.
+An exciting Bash countdown timer.
 
 ## Demo
 <p align="center">
