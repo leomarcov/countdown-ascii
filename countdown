@@ -80,24 +80,6 @@ function progress_bar() {
 
 
 #=== FUNCTION ==================================================================
-# NAME: screen_border
-# DESCRIPTION: print border in screen
-#===============================================================================
-function screen_border() {
-	l="$(tput lines)"
-	c="$(tput cols)"
-
-	# Draw border
-	echo
-	echo " ┌$(seq -s "─" 1 $((c-3)) | tr -d "[0-9]")┐ "
-	for ((i=0; i<$l-4;i++)); do
-		echo " │$(seq -s " " 1 $((c-3)) | tr -d "[0-9]")│ "
-	done
-	echo " └$(seq -s "─" 1 $((c-3)) | tr -d "[0-9]")┘ "
-}
-
-
-#=== FUNCTION ==================================================================
 # NAME: cursor_hide
 # DESCRIPTION: hides cursor
 #===============================================================================
@@ -129,6 +111,29 @@ function ring() {
 
 
 #=== FUNCTION ==================================================================
+# NAME: print_background
+# DESCRIPTION: print border and banners
+#===============================================================================
+function print_background() {
+	clear
+	local l="$(tput lines)"
+	local c="$(tput cols)"
+
+	# Draw border
+	echo
+	echo " ┌$(seq -s "─" 1 $((c-3)) | tr -d "[0-9]")┐ "
+	for ((i=0; i<$l-4;i++)); do
+		echo " │$(seq -s " " 1 $((c-3)) | tr -d "[0-9]")│ "
+	done
+	echo " └$(seq -s "─" 1 $((c-3)) | tr -d "[0-9]")┘ "
+
+	print_centered "$(toilet -f future "$banner1")" 5
+	print_centered "$banner2" 8
+}
+
+
+
+#=== FUNCTION ==================================================================
 # NAME: help
 # DESCRIPTION: show help and exit
 # PARAMETERS
@@ -144,59 +149,71 @@ function help() {
 }
 
 
+#=== FUNCTION ==================================================================
+# NAME: main
+# DESCRIPTION: start funcion when exec script
+# PARAMETERS
+#	$@	all script parameters
+#===============================================================================
+function main() {
+	# Check if help
+	[ "$1" = "-h" ] && help
 
-# HELP
-[ "$1" = "-h" ] && help
+	# CHECK PARAMETERS
+	until="$1"
+	from="$2"
+	[ ! "$from" ] && from="$(date +"%H:%M:%S")"
+	date -d"$(date +%Y-%m-%d) $until" &>/dev/null || { echo "$until: Incorrect hour format (hh:mm[:ss])" 1>&2; exit 1; }
+	date -d"$(date +%Y-%m-%d) $from" &>/dev/null || { echo "$from: Incorrect hour format (hh:mm[:ss])"  1>&2; exit 1; }
+	duntil="$(date -d"$(date +%Y-%m-%d) $until" +%s)"
+	dfrom="$(date -d"$(date +%Y-%m-%d) $from" +%s)"
 
-# CHECK PARAMETERS
-until="$1"
-from="$2"
-[ ! "$from" ] && from="$(date +"%H:%M:%S")"
-date -d"$(date +%Y-%m-%d) $until" &>/dev/null || { echo "$until: Incorrect hour format (hh:mm[:ss])" 1>&2; exit 1; }
-date -d"$(date +%Y-%m-%d) $from" &>/dev/null || { echo "$from: Incorrect hour format (hh:mm[:ss])"  1>&2; exit 1; }
-duntil="$(date -d"$(date +%Y-%m-%d) $until" +%s)"
-dfrom="$(date -d"$(date +%Y-%m-%d) $from" +%s)"
+	# CHECK DEPENDENCES
+	! which tput &>/dev/null   && {	echo "tput command not found!" 1>&2; 	exit 1; }
+	! which toilet &>/dev/null && { echo "toilet command not found!" 1>&2;	exit 1; }
+	[ "$(tput lines)" -lt 25 ] && { echo "minimun screen lines is 25" 1>&2; exit 1; }
 
-# CHECK DEPENDENCES
-! which tput &>/dev/null   && {	echo "tput command not found!" 1>&2; 	exit 1; }
-! which toilet &>/dev/null && { echo "toilet command not found!" 1>&2;	exit 1; }
-[ "$(tput lines)" -lt 25 ] && { echo "minimun screen lines is 25" 1>&2; exit 1; }
+	# INITIALIZE
+	cursor_hide
+	trap 'cursor_show; exit 0' INT TERM HUP
+
+	# MAIN LOOP
+	while true; do
+		# Check if terminal size has changed
+		if [ "$c" != "$(tput cols)" ] || [ "$l" != "$(tput lines)" ]; then
+			c="$(tput cols)"
+			l="$(tput lines)"
+			print_background 
+		fi
+
+		# Get current percentage
+		dnow="$(date +%s)"
+		percent=$(( (dnow-dfrom)*100/(duntil-dfrom) ))
+
+		# Check overflow and underflow percentage
+		[ "$until" ] && if [ "$percent" -lt 0 ] || [ "$percent" -ge 100 ] || [ "$((duntil-dfrom))" -lt 0 ]; then
+			percent=100
+			echo -e "\e[91m"
+		fi
+
+		# Ring!
+		if  [ "$percent" -ge 100 ] || \
+		   ([ "$percent" -ge 85 ] && [ $(($dnow%(60*5))) -eq 0 ]) || \
+		   ([ "$percent" -ge 95 ] && [ $(($dnow%30)) -eq 0 ])
+		then 
+			ring &
+		fi
+		
+		# Print current timer and bar
+		rc=$(hhmmss_format $((duntil-dnow)) )				# Remaining countdown
+		print_centered "$(toilet -f future "$rc")" 14
+		[ "$until" ] && print_centered "$(progress_bar $percent)" 18
+
+		sleep 1
+	done
+}
 
 
-# Initialize
-clear
-cursor_hide
-trap 'cursor_show; exit 0' INT TERM HUP
+main $@
 
-# Print banner
-screen_border
-print_centered "$(toilet -f future "$banner1")" 5
-print_centered "$banner2" 8
-
-
-while true; do
-	dnow="$(date +%s)"
-	percent=$(( (dnow-dfrom)*100/(duntil-dfrom) ))
-
-	# Check overflow and underflow
-	[ "$until" ] && if [ "$percent" -lt 0 ] || [ "$percent" -ge 100 ] || [ "$((duntil-dfrom))" -lt 0 ]; then
-		percent=100
-		echo -e "\e[91m"
-	fi
-
-	# Ring!
-	if  [ "$percent" -ge 100 ] || \
-	   ([ "$percent" -ge 85 ] && [ $(($dnow%(60*5))) -eq 0 ]) || \
-	   ([ "$percent" -ge 95 ] && [ $(($dnow%30)) -eq 0 ])
-	then 
-		ring &
-	fi
-	
-	# Update countdown and timer
-	rc=$(hhmmss_format $((duntil-dnow)) )				# Remaining countdown
-	print_centered "$(toilet -f future "$rc")" 14
-	[ "$until" ] && print_centered "$(progress_bar $percent)" 18
-
-	sleep 1
-done
 
