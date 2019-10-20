@@ -132,7 +132,7 @@ function help() {
 	echo -e "Samples:"
 	echo -e "  \e[1m$(basename $0)\e[0m\t\tOnly show current time"
 	echo -e "  \e[1m$(basename $0) 10:32\e[0m\tStart countdown from current time to 10:32"
-	echo -e "  \e[1m$(basename $0) 10:32 9:00\e[0m\tStart countdown from 9:00 to 10:32"
+	echo -e "  \e[1m$(basename $0) 10:32 9:00\e[0m\tContinue countdown from 9:00 to 10:32"
 	[ "$1" ] && exit "$1" || exit 0
 }
 
