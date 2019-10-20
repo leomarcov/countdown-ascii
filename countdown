@@ -116,12 +116,8 @@ function ring() {
 #===============================================================================
 function print_background() {
 	clear
-	local l="$(tput lines)"
-	local c="$(tput cols)"
-
-	[ "$l" -lt 25 ] && { echo "minimun screen lines is 25" 1>&2; return 1; }
-	[ "$c" -lt 45 ] && { echo "minimun screen columns is 45" 1>&2; return 1; }
-
+	l="$(tput lines)"
+	c="$(tput cols)"
 
 	# Draw border
 	echo
@@ -135,6 +131,27 @@ function print_background() {
 	print_centered "$banner2" 8
 }
 
+
+#=== FUNCTION ==================================================================
+# NAME: check_terminal_size
+# DESCRIPTION: checks if terminal size (lines and columns) are ok
+# EXIT CODE
+#	0	if ok
+#	1	if not ok
+#===============================================================================
+function check_terminal_size() {
+	local r=0
+	if [ "$l" -lt 25 ]; then
+		clear
+		echo "minimun screen line is 25" 1>&2
+		return 1
+	elif [ "$c" -lt 45 ]; then
+		clear
+		echo "minimun screen column is 45" 1>&2
+		return 1
+	fi
+	return 0
+}
 
 
 #=== FUNCTION ==================================================================
@@ -177,9 +194,6 @@ function main() {
 	# CHECK DEPENDENCES
 	! which tput &>/dev/null   && {	echo "tput command not found!" 1>&2; 	exit 1; }
 	! which toilet &>/dev/null && { echo "toilet command not found!" 1>&2;	exit 1; }
-	[ "$(tput lines)" -lt 25 ] && { echo "minimun screen lines is 25" 1>&2; exit 1; }
-	[ "$(tput cols)" -lt 45 ] && { echo "minimun screen columns is 45" 1>&2; exit 1; }
-
 
 	# INITIALIZE
 	cursor_hide
@@ -187,12 +201,11 @@ function main() {
 
 	# MAIN LOOP
 	while true; do
-		# Check if terminal size has changed
-		if [ "$c" != "$(tput cols)" ] || [ "$l" != "$(tput lines)" ]; then
-			c="$(tput cols)"
-			l="$(tput lines)"
-			print_background
-		fi
+		# Check if terminal size has changed:
+		([ "$c" != "$(tput cols)" ] || [ "$l" != "$(tput lines)" ]) && print_background
+		# Check minimun lines and columns
+		check_terminal_size || { sleep 1; continue; }
+
 
 		# Get current percentage
 		dnow="$(date +%s)"
@@ -217,7 +230,7 @@ function main() {
 		print_centered "$(toilet -f future "$rc")" 14
 		[ "$until" ] && print_centered "$(progress_bar $percent)" 18
 
-		sleep 1
+		sleep 1		
 	done
 }
 
