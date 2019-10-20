@@ -28,34 +28,33 @@ function print_centered() {
 	text="$1"
 	start_line="$2"
 	[ "$start_line" ] && tput cup "$start_line" 0
+	# Get text width (only from first line and exclude special format characters)
 	width=$(echo "$text" | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g" | head -1 | wc -m)
 	tab=$((($(tput cols)-$width)/2))
 	[ "$tab" -lt 0 ] && tab=0
 
 	echo "$text" | while read; do
 		echo -en "\e[${tab}C"
-		echo "${REPLY} "
+		echo "${REPLY} "		# REPLY var dont delete space chars at begin
 	done
 }
 
 
 #=== FUNCTION ==================================================================
-# NAME: countdown
-# DESCRIPTION: print countdown in format h:m:s from current time
+# NAME: hhmmss_format
+# DESCRIPTION: convert number of seconds to hh:mm:ss format
 # PARAMETERS
-#	$1	until time in format hh:mm[:ss]
+#	$1	number of seconds to convert
 #===============================================================================
-function countdown() {
-	local now="$(date +%s)"
-	local until="$(date -d"$(date +%Y-%m-%d) $1" +%s)"
-	local c=$((until-now))
-	[ "$c" -lt 0 ] && c=$((c*-1))
-	local h=$((c/(60*60)))
-	c=$((c-h*60*60))
-	local m=$((c/60))
-	c=$((c-m*60))
-	local s=$c
-	printf "%02d:%02d:%02d" $h $m $s
+function hhmmss_format() {
+	local t="$1"
+	[ "$t" -lt 0 ] && t=$((t*-1))
+	local h=$((t/(60*60)))
+	t=$((t-h*60*60))
+	local m=$((t/60))
+	t=$((t-m*60))
+	local s=$t
+	printf "%02d:%02d:%02d" "$h" "$m" "$s"
 }
 
 
@@ -179,13 +178,11 @@ print_centered "$banner2" 8
 
 
 while true; do
-	c=$(countdown "$until")		# Remaining time
-
 	dnow="$(date +%s)"
 	percent=$(( (dnow-dfrom)*100/(duntil-dfrom) ))
 
 	# Check overflow and underflow
-	[ "$until" ] && if [ $percent -lt 0 ] || [ $percent -gt 100 ] || [ $((duntil-dfrom)) -lt 0 ]; then
+	[ "$until" ] && if [ "$percent" -lt 0 ] || [ "$percent" -gt 100 ] || [ "$((duntil-dfrom))" -lt 0 ]; then
 		percent=100
 		echo -e "\e[91m"
 	fi
@@ -197,7 +194,8 @@ while true; do
 	percent2="$percent"
 	
 	# Update countdown and timer
-	print_centered "$(toilet -f future "$c")" 14
+	rc=$(hhmmss_format $((duntil-dnow)) )				# Remaining countdown
+	print_centered "$(toilet -f future "$rc")" 14
 	[ "$until" ] && print_centered "$(progress_bar $percent)" 18
 
 	sleep 1
