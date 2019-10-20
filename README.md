@@ -13,7 +13,7 @@ Usage: countdown [UNTIL-HOUR] [FROM-HOUR]
 Samples:
   countdown		Only show current time
   countdown 10:32	Start countdown from current time to 10:32
-  countdown 10:32 9:00	Start countdown from 9:00 to 10:32
+  countdown 10:32 9:00	Continue countdown from 9:00 to 10:32
 ```
 
 ## Config
