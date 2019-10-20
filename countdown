@@ -119,6 +119,10 @@ function print_background() {
 	local l="$(tput lines)"
 	local c="$(tput cols)"
 
+	[ "$l" -lt 25 ] && { echo "minimun screen lines is 25" 1>&2; return 1; }
+	[ "$c" -lt 45 ] && { echo "minimun screen columns is 45" 1>&2; return 1; }
+
+
 	# Draw border
 	echo
 	echo " ┌$(seq -s "─" 1 $((c-3)) | tr -d "[0-9]")┐ "
@@ -149,6 +153,8 @@ function help() {
 }
 
 
+
+
 #=== FUNCTION ==================================================================
 # NAME: main
 # DESCRIPTION: start funcion when exec script
@@ -172,6 +178,8 @@ function main() {
 	! which tput &>/dev/null   && {	echo "tput command not found!" 1>&2; 	exit 1; }
 	! which toilet &>/dev/null && { echo "toilet command not found!" 1>&2;	exit 1; }
 	[ "$(tput lines)" -lt 25 ] && { echo "minimun screen lines is 25" 1>&2; exit 1; }
+	[ "$(tput cols)" -lt 45 ] && { echo "minimun screen columns is 45" 1>&2; exit 1; }
+
 
 	# INITIALIZE
 	cursor_hide
@@ -183,7 +191,7 @@ function main() {
 		if [ "$c" != "$(tput cols)" ] || [ "$l" != "$(tput lines)" ]; then
 			c="$(tput cols)"
 			l="$(tput lines)"
-			print_background 
+			print_background
 		fi
 
 		# Get current percentage
@@ -215,5 +223,7 @@ function main() {
 
 
 main $@
+
+
 
 
