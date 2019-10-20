@@ -72,12 +72,9 @@ function progress_bar() {
 	local color="\e[91m"
 	[ "$percent" -lt 85 ] && color="\e[33m"
 	[ "$percent" -lt 50 ] && color="\e[92m" 
-	echo -en "$color"; 	seq -s "█" 0 $current | tr -d "[0-9\n]"; 
-	echo -en "\e[0m"; 	seq -s "▒" 0 $pending | tr -d "[0-9\n]"; echo
-	echo -en "$color";  seq -s "█" 0 $current | tr -d "[0-9\n]"; 
-	echo -en "\e[0m";	seq -s "▒" 0 $pending | tr -d "[0-9\n]"; echo
-	echo -en "$color";  seq -s "█" 0 $current | tr -d "[0-9\n]"; 
-	echo -en "\e[0m";	seq -s "▒" 0 $pending | tr -d "[0-9\n]"; echo
+	echo -en "$color"; seq -s "█" 0 $current | tr -d "[0-9\n]"; echo -en "\e[0m"; seq -s "▒" 0 $pending | tr -d "[0-9\n]"; echo
+	echo -en "$color"; seq -s "█" 0 $current | tr -d "[0-9\n]"; echo -en "\e[0m"; seq -s "▒" 0 $pending | tr -d "[0-9\n]"; echo
+	echo -en "$color"; seq -s "█" 0 $current | tr -d "[0-9\n]"; echo -en "\e[0m"; seq -s "▒" 0 $pending | tr -d "[0-9\n]"; echo
 	seq -s " " 1 $(($current-1-2*$percent/100)) | tr -d "[0-9\n]"; echo "${percent}%"
 }
 
