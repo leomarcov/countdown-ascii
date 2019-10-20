@@ -25,3 +25,7 @@ For config banner edit `countdown` file and set `banner1` and `banner2` variable
 banner1="EXAM TIME!"
 banner2="KEEP CALM AND FOCUS"
 ```
+
+&nbsp;  
+# Lincense
+Labadmin license is [GPLv3](LICENSE)
