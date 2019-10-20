@@ -3,7 +3,7 @@ A Bash countdown timer!
 
 ## Demo
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/32820131/67157034-9673f780-f326-11e9-9e1e-122cc0797fe2.gif">
+  <img src="https://user-images.githubusercontent.com/32820131/67157278-5e6eb380-f32a-11e9-96a6-f2dd409fc1a9.gif">
 </p>
 
 ## Usage
