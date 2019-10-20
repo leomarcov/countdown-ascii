@@ -5,7 +5,7 @@ A Bash countdown timer!
 </p>
 
 ## Usage
-```bash
+```
 $ countdown  -h
 Usage: countdown [UNTIL-HOUR] [FROM-HOUR]
 Samples:
