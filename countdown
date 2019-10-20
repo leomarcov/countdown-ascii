@@ -182,7 +182,7 @@ while true; do
 	percent=$(( (dnow-dfrom)*100/(duntil-dfrom) ))
 
 	# Check overflow and underflow
-	[ "$until" ] && if [ "$percent" -lt 0 ] || [ "$percent" -gt 100 ] || [ "$((duntil-dfrom))" -lt 0 ]; then
+	[ "$until" ] && if [ "$percent" -lt 0 ] || [ "$percent" -ge 100 ] || [ "$((duntil-dfrom))" -lt 0 ]; then
 		percent=100
 		echo -e "\e[91m"
 	fi
