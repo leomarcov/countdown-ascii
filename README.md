@@ -26,6 +26,5 @@ banner1="EXAM TIME!"
 banner2="KEEP CALM AND FOCUS"
 ```
 
-&nbsp;  
-# Lincense
-Labadmin license is [GPLv3](LICENSE)
+## Lincense
+License is [GPLv3](LICENSE)
