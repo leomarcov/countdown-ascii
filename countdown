@@ -143,11 +143,11 @@ function check_terminal_size() {
 	local r=0
 	if [ "$l" -lt 25 ]; then
 		clear
-		echo "minimun screen line is 25" 1>&2
+		echo "minimun screen lines must be 25" 1>&2
 		return 1
 	elif [ "$c" -lt 45 ]; then
 		clear
-		echo "minimun screen column is 45" 1>&2
+		echo "minimun screen columns must be 45" 1>&2
 		return 1
 	fi
 	return 0
